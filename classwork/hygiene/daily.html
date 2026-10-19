@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>卫生值日表</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --ink: #111;
+    --paper: #fff;
+    --mid: #8a8a8a;
+    --soft: #f2f2f2;
+  }
+
+  html, body {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html, body {
+    scrollbar-width: none;        /* Firefox */
+    -ms-overflow-style: none;     /* IE / 旧 Edge */
+  }
+
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar,
+  *::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;     /* Chrome / Safari / 新 Edge */
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 56px 24px 72px;
+    cursor: default;
+    overscroll-behavior: none;    /* 避免移动端橡皮筋回弹干扰 */
+  }
+
+  .app { width: 100%; max-width: 880px; }
+
+  /* ---------- 头部 ---------- */
+  header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding-bottom: 18px;
+    border-bottom: 2px solid var(--ink);
+    margin-bottom: 34px;
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 6px;
+  }
+
+  .sub {
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--mid);
+  }
+
+  /* ---------- 当日标题 ---------- */
+  .day-title {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .day-title h2 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 4px;
+  }
+
+  /* 可点击的“今日 / 次日”按钮 */
+  .today-badge {
+    font-family: inherit;
+    font-size: 11px;
+    letter-spacing: 2px;
+    border: 1px solid var(--ink);
+    padding: 3px 8px 2px;
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    -webkit-tap-highlight-color: transparent;
+    line-height: 1.2;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+  }
+
+  .today-badge:active {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  /* ---------- 任务卡片 ---------- */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    border-top: 1px solid var(--ink);
+    border-left: 1px solid var(--ink);
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-height: 132px;
+    padding: 18px 16px;
+    border-right: 1px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+    animation: rise .35s ease both;
+  }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  .task-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  /* 任务名称：加粗放大 */
+  .task-name {
+    font-size: 19px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+
+  .num {
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 1px;
+    color: var(--mid);
+  }
+
+  .names {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    margin-top: auto;
+  }
+
+  .names span {
+    font-size: 17px;
+    letter-spacing: 1px;
+    padding-bottom: 2px;
+  }
+
+  /* ---------- 空状态 ---------- */
+  .empty {
+    border: 1px solid var(--ink);
+    padding: 72px 24px;
+    text-align: center;
+  }
+
+  .empty p {
+    font-size: 20px;
+    letter-spacing: 6px;
+    font-weight: 700;
+  }
+
+  .empty small {
+    display: block;
+    margin-top: 14px;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--mid);
+  }
+
+  /* ---------- 页脚 ---------- */
+  footer {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid var(--ink);
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--mid);
+  }
+
+  /* ---------- 响应式 ---------- */
+  @media (max-width: 560px) {
+    body { padding: 30px 14px 48px; }
+    h1 { font-size: 21px; letter-spacing: 4px; }
+    .sub { font-size: 11px; }
+    .day-title h2 { font-size: 18px; }
+    .card { padding: 14px 12px; min-height: 112px; gap: 12px; }
+    .task-name { font-size: 16px; letter-spacing: 2px; }
+    .names span { font-size: 15px; }
+    .empty { padding: 56px 16px; }
+    .empty p { font-size: 17px; letter-spacing: 4px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <h1>卫生值日表</h1>
+    <p class="sub">当日值日安排</p>
+  </header>
+
+  <main id="panel"></main>
+
+  <footer>
+    <span>技术：yuyudifiesh</span>
+  </footer>
+</div>
+
+<script>
+  /* ================= 数据 ================= */
+  const TASKS = ['拖地', '扫地', '擦黑板', '擦窗户', '倒垃圾'];
+
+  const DATA = [
+    { day: '周一', people: [
+        ['周隽文', '吴峰'],
+        ['左宸宇', '李星尘'],
+        ['全驿名'],
+        ['刘鑫', '聂于钧'],
+        ['廖新哲', '王凯文']
+      ]},
+    { day: '周二', people: [
+        ['徐筠茹', '吴颖'],
+        ['伍献永', '杨华川'],
+        ['陈惠芸'],
+        ['邓品雪', '王诗慧'],
+        ['李程羽', '熊祉皓']
+      ]},
+    { day: '周三', people: [
+        ['洪鑫', '蒋凌杰'],
+        ['赖宇翔', '郝奕博'],
+        ['黄沛谕'],
+        ['陶思勇', '唐伟明'],
+        ['戴训武', '汪嘉伟']
+      ]},
+    { day: '周四', people: [
+        ['唐冰晗', '万梁贝'],
+        ['张诗若', '邹芷涵'],
+        ['王瑾'],
+        ['雷心怡', '李思源'],
+        ['郭盈盈', '韩瑾']
+      ]},
+    { day: '周五', people: [
+        ['曹海洋', '程铠煦', '曾星宇'],
+        ['罗政涛', '彭虎', '孙蒙'],
+        ['刘源铭'],
+        ['刘梓娇', '欧阳雨嫣'],
+        ['谢延锋', '肖兴平']
+      ]},
+    { day: '周六', people: null },
+    { day: '周日', people: null }
+  ];
+
+  const panelEl = document.getElementById('panel');
+
+  /* 获取今天对应索引：周一 = 0 ... 周日 = 6 */
+  const getTodayIdx = () => (new Date().getDay() + 6) % 7;
+
+  let todayIdx = getTodayIdx();
+  let showTomorrow = false;   // false=显示今日，true=显示次日
+
+  /* ================= 渲染 ================= */
+  function render() {
+    const baseIdx = showTomorrow ? (todayIdx + 1) % 7 : todayIdx;
+    const d = DATA[baseIdx];
+    const badgeText = showTomorrow ? '次日' : '今日';
+
+    let html = `
+      <div class="day-title">
+        <h2>${d.day}</h2>
+        <button type="button" class="today-badge" id="toggleDayBtn">${badgeText}</button>
+      </div>`;
+
+    if (!d.people) {
+      html += `
+        <div class="empty">
+          <p>今日无值日</p>
+          <small>保持整洁 · 好好休息</small>
+        </div>`;
+    } else {
+      html += '<div class="grid">';
+      TASKS.forEach((task, k) => {
+        const names = d.people[k].map(n => `<span>${n}</span>`).join('');
+        html += `
+          <article class="card" style="animation-delay:${k * 60}ms">
+            <div class="task-label">
+              <span class="task-name">${task}</span>
+              <span class="num">${String(k + 1).padStart(2, '0')}</span>
+            </div>
+            <div class="names">${names}</div>
+          </article>`;
+      });
+      html += '</div>';
+    }
+
+    panelEl.innerHTML = html;
+  }
+
+  /* ================= 事件委托：切换今日/次日 ================= */
+  panelEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('.today-badge');
+    if (btn) {
+      showTomorrow = !showTomorrow;
+      render();
+    }
+  });
+
+  /* ================= 初始化 ================= */
+  render();
+
+  /* 跨天自动更新，并重置为显示新的一天 */
+  setInterval(() => {
+    const t = getTodayIdx();
+    if (t !== todayIdx) {
+      todayIdx = t;
+      showTomorrow = false;
+      render();
+    }
+  }, 60 * 1000);
+
+  /* ================= 禁止复制 / 右键 / 拖拽 / 快捷键 ================= */
+  const block = e => e.preventDefault();
+
+  document.addEventListener('copy', block);
+  document.addEventListener('cut', block);
+  document.addEventListener('paste', block);
+  document.addEventListener('contextmenu', block);
+  document.addEventListener('dragstart', block);
+  document.addEventListener('selectstart', block);
+
+  document.addEventListener('keydown', e => {
+    const k = e.key.toLowerCase();
+    const ctrl = e.ctrlKey || e.metaKey;
+    if (ctrl && ['c', 'x', 'a', 's', 'p', 'u'].includes(k)) {
+      e.preventDefault();
+    }
+    if (e.key === 'F12') e.preventDefault();
+  });
+</script>
+
+</body>
+</html>
