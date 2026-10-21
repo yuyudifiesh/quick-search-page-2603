@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#FAF9FD" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#131317" media="(prefers-color-scheme: dark)">
+<title>班级服务</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+
+<style>
+/* ============ 主题角色 ============ */
+:root {
+  color-scheme: light dark;
+
+  --primary: #0B57D0;
+  --on-primary: #FFFFFF;
+  --primary-container: #D3E3FD;
+  --on-primary-container: #041E49;
+
+  --secondary: #5A5C7C;
+  --on-secondary: #FFFFFF;
+  --secondary-container: #DCE2F9;
+  --on-secondary-container: #131C2B;
+
+  --tertiary-container: #FFD8EE;
+  --on-tertiary-container: #2E1125;
+
+  --surface: #FAF9FD;
+  --surface-container-lowest: #FFFFFF;
+  --surface-container-low: #F3F3FA;
+  --surface-container: #EEEDF3;
+  --surface-container-high: #E9E8EF;
+  --surface-container-highest: #E3E2E6;
+
+  --on-surface: #1B1B1F;
+  --on-surface-variant: #44474E;
+  --outline: #74777F;
+  --outline-variant: #C4C6D0;
+
+  --inverse-surface: #303034;
+  --inverse-on-surface: #F2F0F4;
+  --inverse-primary: #A8C7FA;
+
+  --error: #B3261E;
+  --on-error: #FFFFFF;
+  --error-container: #F9DEDC;
+  --on-error-container: #410E0B;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary: #C0C2FD;
+    --on-primary: #042C71;
+    --primary-container: #04409F;
+    --on-primary-container: #E0E0FC;
+
+    --secondary: #C3C3E9;
+    --on-secondary: #1D1F35;
+    --secondary-container: #424463;
+    --on-secondary-container: #E0E0FE;
+
+    --tertiary-container: #6E334E;
+    --on-tertiary-container: #FFD8E7;
+
+    --surface: #131317;
+    --surface-container-lowest: #0D0D11;
+    --surface-container-low: #1B1B1F;
+    --surface-container: #1F1F23;
+    --surface-container-high: #2A2A2E;
+    --surface-container-highest: #343439;
+
+    --on-surface: #E2E2E8;
+    --on-surface-variant: #C6C5D2;
+    --outline: #90909C;
+    --outline-variant: #464651;
+
+    --inverse-surface: #E2E2E8;
+    --inverse-on-surface: #303034;
+    --inverse-primary: #3757BA;
+
+    --error: #F2B8B5;
+    --on-error: #601410;
+    --error-container: #8C1D18;
+    --on-error-container: #F9DEDC;
+  }
+}
+
+/* ============ 基础重置 ============ */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--surface);
+  color: var(--on-surface);
+  font-family: 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior: none;
+}
+
+body { overflow: hidden; }
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* ============ 图标 ============ */
+.material-symbols-rounded {
+  font-family: 'Material Symbols Rounded';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+/* ============ 应用容器 ============ */
+.app {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--surface);
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ============ 屏幕 ============ */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  transform: translateX(100%);
+  transition: transform 0.38s cubic-bezier(0.2, 0, 0, 1);
+  visibility: hidden;
+  will-change: transform;
+  z-index: 1;
+}
+
+.screen.active {
+  transform: translateX(0);
+  visibility: visible;
+  z-index: 2;
+}
+
+/* ============ 顶部应用栏 ============ */
+.app-bar {
+  flex: 0 0 auto;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px;
+  background: var(--surface);
+  transition: background-color 0.22s cubic-bezier(0.2, 0, 0, 1);
+  position: relative;
+  z-index: 3;
+}
+
+.app-bar.scrolled { background: var(--surface-container); }
+
+.app-bar-title {
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--on-surface);
+  margin: 0;
+  padding-left: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.icon-btn {
+  flex: 0 0 auto;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--on-surface-variant);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.12s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.icon-btn:active { transform: scale(0.92); }
+
+.icon-btn.static {
+  cursor: default;
+  pointer-events: none;
+}
+
+/* ============ 滚动区域 & 内容 ============ */
+.scroll-area {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.content {
+  width: 100%;
+  max-width: 840px;
+  margin: 0 auto;
+  padding: 4px 16px 32px;
+}
+
+/* ============ 分组标题 ============ */
+.section-title {
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--on-surface);
+  margin: 20px 0 12px;
+  padding: 0;
+}
+
+.section-title:first-child { margin-top: 4px; }
+
+/* ============ 列表 ============ */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.list-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  min-height: 72px;
+  padding: 12px 16px;
+  background: var(--surface-container-low);
+  border-radius: 8px;
+  text-align: left;
+  overflow: hidden;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.14s cubic-bezier(0.2, 0, 0, 1),
+              background-color 0.14s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.list-item:first-child { border-radius: 28px 28px 8px 8px; }
+.list-item:last-child  { border-radius: 8px 8px 28px 28px; }
+.list-item:only-child  { border-radius: 28px; }
+
+.list-item:active { transform: scale(0.98); }
+
+.icon-circle {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  display: grid;
+  place-items: center;
+}
+
+.icon-circle .material-symbols-rounded { font-size: 24px; }
+
+.item-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.item-primary {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 500;
+  letter-spacing: 0.15px;
+  color: var(--on-surface);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-secondary {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  letter-spacing: 0.25px;
+  color: var(--on-surface-variant);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ============ 分割线 ============ */
+.divider {
+  height: 1px;
+  border: none;
+  background: var(--outline-variant);
+  margin: 20px 0;
+}
+
+/* ============ 涟漪 ============ */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.14;
+  transform: scale(0);
+  animation: rippleAnim 0.55s cubic-bezier(0.2, 0, 0, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes rippleAnim {
+  to { transform: scale(1); opacity: 0; }
+}
+
+/* ============ 嵌入页面 ============ */
+.iframe-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  position: relative;
+  background: var(--surface-container-lowest);
+}
+
+.iframe-wrap iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  background: transparent;
+}
+
+/* ============ 减少动效 ============ */
+@media (prefers-reduced-motion: reduce) {
+  .screen { transition-duration: 0.01ms; }
+  .list-item, .icon-btn { transition-duration: 0.01ms; }
+  .ripple { animation-duration: 0.01ms; }
+}
+</style>
+</head>
+
+<body>
+<div class="app" id="app">
+
+  <!-- ==================== 屏幕 1：班级服务 ==================== -->
+  <section class="screen active" id="screen-home" aria-label="班级服务">
+    <header class="app-bar" id="home-app-bar">
+      <div class="icon-btn static" aria-hidden="true">
+        <span class="material-symbols-rounded">person</span>
+      </div>
+      <h1 class="app-bar-title">班级服务</h1>
+    </header>
+
+    <div class="scroll-area" id="home-scroll">
+      <div class="content">
+
+        <h2 class="section-title">课堂服务</h2>
+        <div class="list" role="list">
+          <button class="list-item" role="listitem" data-nav="classroom">
+            <span class="icon-circle"><span class="material-symbols-rounded">groups</span></span>
+            <span class="item-text">
+              <span class="item-primary">教室查询</span>
+              <span class="item-secondary">按课程查询教室位置</span>
+            </span>
+          </button>
+          <button class="list-item" role="listitem" data-nav="names">
+            <span class="icon-circle"><span class="material-symbols-rounded">verified</span></span>
+            <span class="item-text">
+              <span class="item-primary">姓名列表</span>
+              <span class="item-secondary">快速清人辅助工具</span>
+            </span>
+          </button>
+        </div>
+
+        <hr class="divider">
+
+        <h2 class="section-title">排班工具</h2>
+        <div class="list" role="list">
+          <button class="list-item" role="listitem" data-nav="hygiene">
+            <span class="icon-circle"><span class="material-symbols-rounded">face</span></span>
+            <span class="item-text">
+              <span class="item-primary">卫生安排表</span>
+              <span class="item-secondary">班级卫生排班自动轮换工具</span>
+            </span>
+          </button>
+        </div>
+
+        <hr class="divider">
+
+        <h2 class="section-title">班规班纪</h2>
+        <div class="list" role="list">
+          <button class="list-item" role="listitem" data-nav="rules">
+            <span class="icon-circle"><span class="material-symbols-rounded">description</span></span>
+            <span class="item-text">
+              <span class="item-primary">查阅班规</span>
+              <span class="item-secondary">现行班规查阅</span>
+            </span>
+          </button>
+          <button class="list-item" role="listitem" data-nav="query">
+            <span class="icon-circle"><span class="material-symbols-rounded">search</span></span>
+            <span class="item-text">
+              <span class="item-primary">班规加扣分查询系统</span>
+              <span class="item-secondary">查询班规加扣分记录</span>
+            </span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 教室查询 ==================== -->
+  <section class="screen" id="screen-classroom" aria-label="教室查询">
+    <header class="app-bar">
+      <button class="icon-btn" data-back aria-label="返回">
+        <span class="material-symbols-rounded">keyboard_backspace</span>
+      </button>
+      <h1 class="app-bar-title">教室查询</h1>
+    </header>
+    <div class="iframe-wrap">
+      <iframe data-src="https://yuyudifiesh.github.io/quick-search-page-2603/classwork/tools/course.html"
+              title="教室查询" referrerpolicy="no-referrer-when-downgrade" allow="clipboard-write"></iframe>
+    </div>
+  </section>
+
+  <!-- ==================== 姓名列表 ==================== -->
+  <section class="screen" id="screen-names" aria-label="姓名列表">
+    <header class="app-bar">
+      <button class="icon-btn" data-back aria-label="返回">
+        <span class="material-symbols-rounded">keyboard_backspace</span>
+      </button>
+      <h1 class="app-bar-title">姓名列表工具</h1>
+    </header>
+    <div class="iframe-wrap">
+      <iframe data-src="https://yuyudifiesh.github.io/quick-search-page-2603/classwork/tools/name.html"
+              title="姓名列表工具" referrerpolicy="no-referrer-when-downgrade" allow="clipboard-write"></iframe>
+    </div>
+  </section>
+
+  <!-- ==================== 卫生排班 ==================== -->
+  <section class="screen" id="screen-hygiene" aria-label="卫生排班">
+    <header class="app-bar">
+      <button class="icon-btn" data-back aria-label="返回">
+        <span class="material-symbols-rounded">keyboard_backspace</span>
+      </button>
+      <h1 class="app-bar-title">卫生排班</h1>
+    </header>
+    <div class="iframe-wrap">
+      <iframe data-src="https://yuyudifiesh.github.io/quick-search-page-2603/classwork/hygiene/daily.html"
+              title="卫生排班" referrerpolicy="no-referrer-when-downgrade" allow="clipboard-write"></iframe>
+    </div>
+  </section>
+
+  <!-- ==================== 班规 ==================== -->
+  <section class="screen" id="screen-rules" aria-label="班规">
+    <header class="app-bar">
+      <button class="icon-btn" data-back aria-label="返回">
+        <span class="material-symbols-rounded">keyboard_backspace</span>
+      </button>
+      <h1 class="app-bar-title">班规</h1>
+    </header>
+    <div class="iframe-wrap">
+      <iframe data-src="https://yuyudifiesh.github.io/quick-search-page-2603/docs/rule.html"
+              title="班规" referrerpolicy="no-referrer-when-downgrade" allow="clipboard-write"></iframe>
+    </div>
+  </section>
+
+  <!-- ==================== 查询系统 ==================== -->
+  <section class="screen" id="screen-query" aria-label="班规加扣分查询">
+    <header class="app-bar">
+      <button class="icon-btn" data-back aria-label="返回">
+        <span class="material-symbols-rounded">keyboard_backspace</span>
+      </button>
+      <h1 class="app-bar-title">班规加扣分查询</h1>
+    </header>
+    <div class="iframe-wrap">
+      <iframe data-src="https://www.kdocs.cn/etapps/query/q/SjMG65VZ"
+              title="班规加扣分查询" referrerpolicy="no-referrer-when-downgrade" allow="clipboard-write"></iframe>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------------- 屏幕注册 ---------------- */
+  var screens = {
+    home:      document.getElementById('screen-home'),
+    classroom: document.getElementById('screen-classroom'),
+    names:     document.getElementById('screen-names'),
+    hygiene:   document.getElementById('screen-hygiene'),
+    rules:     document.getElementById('screen-rules'),
+    query:     document.getElementById('screen-query')
+  };
+
+  var stack = ['home'];
+  var zCounter = 2;
+  var CLOSE_DELAY = 400;
+
+  /* ---------------- 涟漪反馈 ---------------- */
+  function attachRipple(el) {
+    el.addEventListener('pointerdown', function (e) {
+      if (e.button !== undefined && e.button !== 0) return;
+      var rect = el.getBoundingClientRect();
+      var size = Math.max(rect.width, rect.height) * 2.2;
+      var span = document.createElement('span');
+      span.className = 'ripple';
+      span.style.width = size + 'px';
+      span.style.height = size + 'px';
+      span.style.left = (e.clientX - rect.left - size / 2) + 'px';
+      span.style.top  = (e.clientY - rect.top  - size / 2) + 'px';
+      el.appendChild(span);
+      window.setTimeout(function () {
+        if (span.parentNode) span.parentNode.removeChild(span);
+      }, 620);
+    });
+  }
+
+  document.querySelectorAll('.list-item, .icon-btn:not(.static)').forEach(attachRipple);
+
+  /* ---------------- 懒加载 iframe ---------------- */
+  function lazyLoadIframe(id) {
+    var el = screens[id];
+    if (!el) return;
+    var frame = el.querySelector('iframe[data-src]');
+    if (frame && !frame.getAttribute('src')) {
+      frame.setAttribute('src', frame.getAttribute('data-src'));
+    }
+  }
+
+  /* ---------------- 屏幕进入 / 退出 ---------------- */
+  function openScreen(id) {
+    var el = screens[id];
+    if (!el) return;
+    if (stack[stack.length - 1] === id) return;
+
+    lazyLoadIframe(id);
+
+    el.style.zIndex = String(++zCounter);
+    el.style.visibility = 'visible';
+    el.style.pointerEvents = 'auto';
+
+    // 强制样式计算，确保起始位移生效
+    void el.offsetWidth;
+
+    el.classList.add('active');
+    stack.push(id);
+
+    try {
+      history.pushState({ screen: id }, '', '#' + id);
+    } catch (err) { /* ignore */ }
+  }
+
+  function closeScreen(id) {
+    var el = screens[id];
+    if (!el) return;
+    el.classList.remove('active');
+    el.style.pointerEvents = 'none';
+
+    window.setTimeout(function () {
+      if (!el.classList.contains('active')) {
+        el.style.visibility = 'hidden';
+      }
+    }, CLOSE_DELAY);
+  }
+
+  /* ---------------- 事件绑定 ---------------- */
+  document.querySelectorAll('[data-nav]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      openScreen(btn.getAttribute('data-nav'));
+    });
+  });
+
+  document.querySelectorAll('[data-back]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      if (stack.length > 1) {
+        history.back();
+      }
+    });
+  });
+
+  /* 浏览器返回 / 系统返回手势 */
+  window.addEventListener('popstate', function () {
+    if (stack.length > 1) {
+      var id = stack.pop();
+      closeScreen(id);
+    }
+  });
+
+  /* 初始历史状态 */
+  try {
+    history.replaceState({ screen: 'home' }, '', location.pathname + location.search);
+  } catch (err) { /* ignore */ }
+
+  /* ---------------- 应用栏滚动变色 ---------------- */
+  var homeScroll = document.getElementById('home-scroll');
+  var homeBar = document.getElementById('home-app-bar');
+
+  if (homeScroll && homeBar) {
+    homeScroll.addEventListener('scroll', function () {
+      homeBar.classList.toggle('scrolled', homeScroll.scrollTop > 2);
+    }, { passive: true });
+  }
+
+  /* ---------------- 键盘 Esc 返回 ---------------- */
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && stack.length > 1) {
+      history.back();
+    }
+  });
+
+})();
+</script>
+</body>
+</html>
