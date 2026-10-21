@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>2603班级行为规范管理细则</title>
+<style>
+  :root{
+    --bg:#ffffff;
+    --card:#ffffff;
+    --text:#111111;
+    --sub:#777777;
+    --line:#e2e2e2;
+    --line-strong:#111111;
+    --gray-bg:#f6f6f6;
+  }
+  *{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+  }
+  html,body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+    font-size:15px;
+    line-height:1.75;
+    -webkit-user-select:none;
+    -moz-user-select:none;
+    -ms-user-select:none;
+    user-select:none;
+    -webkit-touch-callout:none;
+  }
+  .wrap{
+    max-width:720px;
+    margin:0 auto;
+    padding:24px 20px 56px;
+  }
+
+  /* 头部 */
+  .header{
+    padding:0 0 20px;
+    border-bottom:2px solid var(--line-strong);
+    text-align:left;
+  }
+  .header h1{
+    font-size:22px;
+    letter-spacing:2px;
+    font-weight:700;
+  }
+  .header p{
+    margin-top:10px;
+    font-size:12.5px;
+    color:var(--sub);
+    letter-spacing:1px;
+  }
+
+  /* 通用块 */
+  .block{
+    margin-top:32px;
+  }
+
+  /* 说明 */
+  .notice h2{
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:3px;
+    color:var(--text);
+    margin-bottom:12px;
+  }
+  .notice ol{
+    list-style:none;
+    counter-reset:item;
+  }
+  .notice ol li{
+    counter-increment:item;
+    position:relative;
+    padding-left:26px;
+    font-size:13.5px;
+    color:#444;
+    margin-bottom:9px;
+    line-height:1.8;
+  }
+  .notice ol li::before{
+    content:counter(item);
+    position:absolute;
+    left:0;top:0;
+    width:18px;height:18px;
+    line-height:18px;
+    text-align:center;
+    font-size:11px;
+    color:#fff;
+    background:#111;
+    border-radius:0;
+  }
+
+  /* 章节 */
+  .section{
+    margin-top:36px;
+    padding-top:0;
+  }
+  .section-title{
+    font-size:16px;
+    font-weight:700;
+    letter-spacing:1px;
+    padding-bottom:10px;
+    border-bottom:1px solid var(--line-strong);
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+  }
+  .section-title .idx{
+    font-size:12px;
+    font-weight:400;
+    color:var(--sub);
+    letter-spacing:2px;
+    flex:0 0 auto;
+  }
+  .section-body{
+    padding-top:4px;
+  }
+
+  /* 小标题 */
+  .sub-title{
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:3px;
+    color:var(--text);
+    margin:20px 0 6px;
+    padding-bottom:6px;
+    border-bottom:1px solid var(--line);
+  }
+  .sub-title.plus::before,
+  .sub-title.minus::before{
+    content:"";
+    display:inline-block;
+    width:8px;height:8px;
+    margin-right:8px;
+    vertical-align:1px;
+  }
+  .sub-title.plus::before{
+    background:var(--text);          /* 实心 = 加分 */
+  }
+  .sub-title.minus::before{
+    border:1px solid var(--text);    /* 空心 = 扣分 */
+  }
+
+  /* 条目列表 */
+  ul.rules{
+    list-style:none;
+    counter-reset:r;
+  }
+  ul.rules li{
+    counter-increment:r;
+    position:relative;
+    padding:10px 0 10px 28px;
+    font-size:14px;
+    color:#333;
+    border-bottom:1px solid var(--line);
+    line-height:1.8;
+  }
+  ul.rules li:last-child{
+    border-bottom:none;
+  }
+  ul.rules li::before{
+    content:counter(r) ".";
+    position:absolute;
+    left:0;top:10px;
+    font-size:13px;
+    font-weight:700;
+    color:#111;
+    font-variant-numeric:tabular-nums;
+  }
+
+  /* 强调数字：统一用下划线式加粗，不加颜色 */
+  em{
+    font-style:normal;
+    font-weight:700;
+    color:var(--text);
+  }
+
+  /* 附则等无序号列表 */
+  ul.plain{
+    list-style:none;
+  }
+  ul.plain li{
+    position:relative;
+    padding:10px 0 10px 16px;
+    font-size:14px;
+    color:#333;
+    border-bottom:1px solid var(--line);
+    line-height:1.8;
+  }
+  ul.plain li:last-child{
+    border-bottom:none;
+  }
+  ul.plain li::before{
+    content:"—";
+    position:absolute;
+    left:0;top:10px;
+    color:#bbb;
+  }
+
+  /* 页脚 */
+  .footer-note{
+    margin-top:48px;
+    padding-top:20px;
+    border-top:2px solid var(--line-strong);
+    text-align:left;
+    font-size:12.5px;
+    color:var(--sub);
+    line-height:2;
+    letter-spacing:1px;
+  }
+  .footer-note .org{
+    font-weight:700;
+    color:var(--text);
+    font-size:13.5px;
+  }
+
+  /* 顶部进度条 */
+  #bar{
+    position:fixed;
+    top:0;left:0;
+    height:2px;
+    width:0;
+    background:#111;
+    z-index:99;
+    transition:width .1s linear;
+  }
+</style>
+</head>
+<body>
+
+<div id="bar"></div>
+
+<div class="wrap">
+
+  <div class="header">
+    <h1>班级行为规范管理细则</h1>
+    <p>物联网2603班 · 班委会制定</p>
+  </div>
+
+  <!-- 说明 -->
+  <div class="block notice">
+    <h2>总则说明</h2>
+    <ol>
+      <li>该行为规范由物联网2603班全体班委会成员表决通过。</li>
+      <li>总分用于班级学期综测评定，作为评优评先、推优参考。</li>
+      <li>旷课、夜不归宿单次扣8分（最高单项扣分），同一违规行为多次发生，扣分累计递增。</li>
+      <li>所有加减分由班委记录，辅导员审核，定期公示；细则可后续根据辅导员意见微调。</li>
+      <li>每人一学期100分，加分不设上限，低于70分取消评优评先推优资格。</li>
+      <li>所有违纪解决办法以班委说明为准。</li>
+    </ol>
+  </div>
+
+  <!-- 一 -->
+  <div class="section">
+    <div class="section-title"><span class="idx">一</span>学习管理（课堂、作业、晚自习）</div>
+    <div class="section-body">
+
+      <div class="sub-title plus">加分项</div>
+      <ul class="rules">
+        <li>课堂表现良好，积极回答问题、上台答题且回答正确，<em>+1分/次</em>（单节课仅限一次）。</li>
+        <li>作业、小组任务完成质量优秀，获得任课老师公开表扬，<em>+1分/次</em>。</li>
+        <li>积极为各位老师分担工作的，<em>+2分/次</em>。</li>
+        <li>期中、期末成绩班上前10%，<em>+5分/次</em>。</li>
+        <li>成绩进步幅度在10人以上的，<em>+5分/次</em>。</li>
+      </ul>
+
+      <div class="sub-title minus">扣分项</div>
+      <ul class="rules">
+        <li>无故旷课：上课超五分钟未到算旷课，<em>扣8分/次</em>（单项最高扣分），并做出说明，和辅导员老师解释，多次违规扣分累计叠加。早操、晚自习不来都作为半节旷课。</li>
+        <li>上课迟到、早退：<em>扣3分/次</em>，重复违规扣分递增。</li>
+        <li>上课未携带对应课本、学习资料：<em>扣2分/次</em>。</li>
+        <li>课堂睡觉，被任课老师点名提醒：<em>扣3分/次</em>。</li>
+        <li>课堂吃东西、零食、饮品：<em>扣2分/次</em>。</li>
+        <li>课堂闲聊、频繁做小动作干扰他人，被老师提醒：<em>扣3分/次</em>。</li>
+        <li>未经老师、班委允许、未报备，私自离开教室：<em>扣3分/次</em>。</li>
+        <li>课程作业、小组作业逾期未提交：<em>扣2分/次</em>。</li>
+        <li>晚自习喧哗闲聊，制止无果，扰乱班级秩序：<em>扣3分/次</em>。</li>
+        <li>课堂、晚自习拒不上交手机、玩手机，上交备用机顶替，一经查实：<em>扣5分/次</em>，并个人反思。</li>
+        <li>顶撞老师，对待老师态度恶劣者，<em>扣8分/次</em>，并对相应老师做出说明。</li>
+        <li>凡是晚自习被部门查到违纪现象的，<em>扣3分/次</em>，做出思想陈述。</li>
+      </ul>
+
+    </div>
+  </div>
+
+  <!-- 二 -->
+  <div class="section">
+    <div class="section-title"><span class="idx">二</span>集体活动与班级事务管理</div>
+    <div class="section-body">
+
+      <div class="sub-title plus">加分项</div>
+      <ul class="rules">
+        <li>主动报名参与班级、学院、学校各类集体活动，参加各级比赛，根据活动规模<em>加2-5分</em>不等；活动中表现积极、成果突出加额外分。</li>
+        <li>参与集体竞赛项目并取得名次，参赛成员<em>加3分</em>。</li>
+        <li>主动报名参与学科竞赛、技能比赛，<em>加3分/次</em>；竞赛获奖可根据奖项级别额外加分。</li>
+        <li>积极配合并辅助班委完成信息统计、材料填报、消息回执等班级工作，酌情<em>加2分</em>。</li>
+        <li>主动践行好人好事、参与志愿服务，传递班级正能量，经核实后根据情况大小<em>加2-5分/次</em>。</li>
+        <li>积极为各部门工作，为班级事务做出贡献可以凭相关证明<em>加2分</em>。</li>
+      </ul>
+
+      <div class="sub-title minus">扣分项</div>
+      <ul class="rules">
+        <li>无特殊正当理由，缺席班会、团日活动、运动会、学院大型集体活动：<em>扣3分</em>，多次违规依次递增。</li>
+        <li>参与集体活动期间，擅自脱离队伍、态度消极敷衍、玩手机、闲聊喧哗扰乱秩序：<em>扣3分/次</em>，多次违规依次递增。</li>
+        <li>大型集体活动没有找班委请假，无故中途离场、活动期间私自打游戏：<em>扣3分/次</em>。</li>
+        <li>无故拖延、敷衍了事、拒不配合班级信息统计、材料提交等常规事务，不配合班委工作，态度恶劣：<em>扣5分/次</em>。</li>
+      </ul>
+
+    </div>
+  </div>
+
+  <!-- 三 -->
+  <div class="section">
+    <div class="section-title"><span class="idx">三</span>卫生管理（教室 + 宿舍）</div>
+    <div class="section-body">
+
+      <div class="sub-title plus">加分项</div>
+      <ul class="rules">
+        <li>认真履行教室值日职责，主动清理课桌、地面、抽屉垃圾，自觉维护班级环境卫生，酌情加分。</li>
+        <li>认真完成宿舍值日工作，寝室整洁规范、卫生达标，可酌情加分。</li>
+      </ul>
+
+      <div class="sub-title minus">扣分项</div>
+      <ul class="rules">
+        <li>教室值日敷衍应付、推诿懈怠，随意乱扔垃圾、破坏教室卫生：<em>扣2分/次</em>。部门检查如果未达标及时整改，如未整改<em>扣5分</em>。</li>
+        <li>课后课桌遗留杂物、垃圾，未及时清理：<em>扣2分/次</em>。</li>
+        <li>宿舍值日不认真，卫生检查不达标、未获评优秀：当日宿舍所有人员<em>扣3分</em>，寝室长和当日值班同学监督不力追加<em>扣2分</em>，并打扫教室卫生一周。</li>
+        <li>在教室、走廊等公共区域乱扔垃圾、随地吐痰，破坏公共环境：<em>扣2分/次</em>。</li>
+        <li>如遇领导检查宿舍卫生被批评扣分，整个宿舍<em>扣5分</em>，向对应负责人做出情况说明。</li>
+      </ul>
+
+    </div>
+  </div>
+
+  <!-- 四 -->
+  <div class="section">
+    <div class="section-title"><span class="idx">四</span>早操、作息与文明行为</div>
+    <div class="section-body">
+
+      <div class="sub-title plus">加分项</div>
+      <ul class="rules">
+        <li>主动调解宿舍矛盾、化解同学纠纷，积极维护和睦融洽的寝室及班级氛围，有效避免冲突发生，经核实后酌情加分。</li>
+      </ul>
+
+      <div class="sub-title minus">扣分项</div>
+      <ul class="rules">
+        <li>早操无故迟到、早退：<em>扣3分</em>，多次违规依次递增。</li>
+        <li>夜间作息期间，在宿舍大声外放音乐、长时间喧哗打电话，扰民且被室友多次投诉：<em>扣3分/次</em>。</li>
+        <li>顶撞师长、言语态度恶劣、不服从管理：<em>扣8分/次</em>，对相应老师做好自我反省。</li>
+        <li>个人违纪行为受到学校、学院公开通报批评：<em>扣8分/次</em>，并承担班级卫生打扫一周，做好个人反思。</li>
+        <li>晚就寝不打卡、晚归、晚上不熄灯视情况<em>扣3-6分/次</em>，违规电器（烟和火机也算）被查到<em>扣3分</em>。夜不归宿与旷课同罪，<em>扣8分</em>，并向老师说明情况。</li>
+      </ul>
+
+    </div>
+  </div>
+
+  <!-- 五 -->
+  <div class="section">
+    <div class="section-title"><span class="idx">五</span>违纪附加处理措施</div>
+    <div class="section-body">
+      <ul class="rules">
+        <li>查实无故旷课行为：除扣除对应<em>8分</em>外，需在晚自习对着班上同学做出自我反思，并去找辅导员老师说明。</li>
+        <li>顶撞师长、态度恶劣、拒不服从管理：扣除对应<em>8分</em>，做出自我检查，并全天站立听课反省。</li>
+        <li>因个人违纪收到学校、学院通报批评：除扣除对应<em>8分</em>外，负责班级公共卫生打扫一周。</li>
+        <li>自我检查需要对着班上同学，要求深刻反省，明白自己的错误，由各班委公证。</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 六 -->
+  <div class="section">
+    <div class="section-title"><span class="idx">六</span>附则</div>
+    <div class="section-body">
+      <ul class="plain">
+        <li>同一违规行为多次发生，按照对应规则依次递增扣分，分数累计计算。</li>
+        <li>班级所有加减分记录由班委如实登记、存档，定期全班公示，接受全体同学监督核对。</li>
+        <li>本细则以学校、学院规章制度为核心依据，若条款与校规校纪冲突，以官方规章制度为准。</li>
+        <li>本细则经全体班委会同学、辅导员审核通过后正式生效，后续可根据班级实际情况微调完善。</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    <div class="org">物联网2603班班委会</div>
+    <div>2026年10月17日</div>
+  </div>
+
+</div>
+
+<script>
+  /* ========== 禁止选中、复制、剪切、右键 ========== */
+  document.addEventListener('selectstart', function (e) { e.preventDefault(); }, false);
+  document.addEventListener('copy',  function (e) { e.preventDefault(); }, false);
+  document.addEventListener('cut',   function (e) { e.preventDefault(); }, false);
+  document.addEventListener('contextmenu', function (e) { e.preventDefault(); }, false);
+  document.addEventListener('dragstart', function (e) { e.preventDefault(); }, false);
+
+  /* 禁止双击 / 长按选中（移动端） */
+  document.addEventListener('dblclick', function (e) { e.preventDefault(); }, false);
+  var lastTouch = 0;
+  document.addEventListener('touchend', function (e) {
+    var now = Date.now();
+    if (now - lastTouch <= 300) { e.preventDefault(); }
+    lastTouch = now;
+  }, false);
+
+  /* 监听快捷键复制 */
+  document.addEventListener('keydown', function (e) {
+    var key = (e.key || '').toLowerCase();
+    if ((e.ctrlKey || e.metaKey) && (key === 'c' || key === 'a' || key === 'x')) {
+      e.preventDefault();
+      return false;
+    }
+  }, false);
+
+  /* ========== 顶部阅读进度条 ========== */
+  var bar = document.getElementById('bar');
+  window.addEventListener('scroll', function () {
+    var h = document.documentElement.scrollHeight - window.innerHeight;
+    var p = h > 0 ? (window.pageYOffset / h) * 100 : 0;
+    bar.style.width = p + '%';
+  }, { passive: true });
+</script>
+
+</body>
+</html>
