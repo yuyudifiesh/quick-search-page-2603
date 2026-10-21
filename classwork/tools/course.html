@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>课程查询</title>
+<style>
+  :root{
+    --ink:#111;
+    --muted:#8a8a8a;
+    --line:#e3e3e3;
+    --bg:#fff;
+  }
+  *{
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;   /* 移除移动端点击蓝色高亮 */
+    -webkit-touch-callout:none;                /* 禁止长按弹出菜单 */
+    -webkit-user-select:none;                  /* 禁止选中文字 */
+    -moz-user-select:none;
+    -ms-user-select:none;
+    user-select:none;
+  }
+  html,body{
+    margin:0;
+    padding:0;
+    scrollbar-width:none;                      /* Firefox 隐藏滚动条 */
+    -ms-overflow-style:none;                   /* IE / Edge 隐藏滚动条 */
+  }
+  /* WebKit 浏览器隐藏滚动条 */
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar,
+  *::-webkit-scrollbar{
+    width:0;
+    height:0;
+    display:none;
+  }
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+  }
+  .wrap{
+    max-width:780px;
+    margin:0 auto;
+    padding:30px 18px 70px;
+  }
+
+  /* ---------- 头部 ---------- */
+  header{margin-bottom:26px;}
+  h1{
+    margin:0 0 8px;
+    font-size:21px;
+    font-weight:600;
+    letter-spacing:.12em;
+  }
+  .sub{
+    margin:0;
+    font-size:12.5px;
+    color:var(--muted);
+    letter-spacing:.06em;
+    font-weight:600;              /* 加粗提示文字 */
+  }
+
+  /* ---------- 筛选区 ---------- */
+  .filters{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:15px;
+    margin-bottom:22px;
+  }
+  @media(min-width:560px){
+    .filters{grid-template-columns:repeat(3,1fr);}
+  }
+  .field label{
+    display:block;
+    font-size:10.5px;
+    letter-spacing:.18em;
+    color:var(--muted);
+    margin-bottom:7px;
+  }
+  .select-wrap{position:relative;}
+  .select-wrap::after{
+    content:"";
+    position:absolute;
+    right:14px;
+    top:50%;
+    width:7px;height:7px;
+    border-right:1.5px solid var(--ink);
+    border-bottom:1.5px solid var(--ink);
+    transform:translateY(-70%) rotate(45deg);
+    pointer-events:none;
+  }
+  select{
+    width:100%;
+    appearance:none;
+    -webkit-appearance:none;
+    background:#fff;
+    border:1px solid #d9d9d9;
+    border-radius:3px;
+    padding:12px 36px 12px 13px;
+    font-size:16px;
+    font-family:inherit;
+    color:var(--ink);
+    letter-spacing:.03em;
+    transition:border-color .18s, box-shadow .18s;
+    -webkit-user-select:auto;
+    user-select:auto;
+  }
+  @media(min-width:560px){
+    select{font-size:14px;}
+  }
+  select:focus{
+    outline:none;
+    border-color:var(--ink);
+    box-shadow:0 0 0 3px rgba(17,17,17,.07);
+  }
+
+  /* ---------- 结果栏 ---------- */
+  .result-bar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:11px 0;
+    border-top:1px solid var(--ink);
+    border-bottom:1px solid var(--line);
+    font-size:12px;
+    letter-spacing:.08em;
+    color:var(--muted);
+  }
+  .result-bar .num{color:var(--ink);font-weight:600;}
+  .reset{
+    background:none;
+    border:none;
+    padding:4px 0;
+    font:inherit;
+    font-size:12px;
+    letter-spacing:.08em;
+    color:var(--muted);
+    cursor:pointer;
+    text-decoration:underline;
+    text-underline-offset:3px;
+    transition:color .18s;
+    -webkit-user-select:none;
+    user-select:none;
+  }
+  .reset:hover{color:var(--ink);}
+
+  /* ---------- 卡片列表 ---------- */
+  .list{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:12px;
+    margin-top:18px;
+  }
+  @media(min-width:620px){
+    .list{grid-template-columns:1fr 1fr;}
+  }
+  .card{
+    border:1px solid var(--line);
+    border-radius:4px;
+    background:#fff;
+    padding:14px 16px 12px;
+    transition:border-color .18s, transform .18s;
+    animation:fade .22s ease both;
+  }
+  @keyframes fade{
+    from{opacity:0;transform:translateY(4px);}
+    to{opacity:1;transform:none;}
+  }
+  .card:hover{border-color:var(--ink);transform:translateY(-1px);}
+  .card-top{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:10px;
+    padding-bottom:10px;
+    margin-bottom:9px;
+    border-bottom:1px solid var(--line);
+  }
+  .name{
+    font-size:15px;
+    font-weight:600;
+    letter-spacing:.03em;
+    word-break:break-word;
+  }
+  .period{
+    flex:none;
+    font-size:10.5px;
+    letter-spacing:.06em;
+    padding:2.5px 8px;
+    border:1px solid var(--ink);
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .row{
+    display:flex;
+    justify-content:space-between;
+    gap:14px;
+    font-size:12.5px;
+    line-height:1.95;
+  }
+  .row .k{color:var(--muted);flex:none;letter-spacing:.04em;}
+  .row .v{color:var(--ink);text-align:right;word-break:break-all;}
+
+  /* ---------- 空状态 ---------- */
+  .empty{
+    margin-top:44px;
+    text-align:center;
+    color:var(--muted);
+    font-size:13px;
+    letter-spacing:.1em;
+  }
+  .empty .line{
+    width:34px;height:1px;
+    background:var(--line);
+    margin:0 auto 16px;
+  }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <h1>课程查询</h1>
+    <p class="sub">请依次选择星期、节次和课程后查看安排。<br>
+      【如有临时调整请以微信群消息为准】
+    </p>
+  </header>
+
+  <section class="filters">
+    <div class="field">
+      <label for="f-day">星期</label>
+      <div class="select-wrap">
+        <select id="f-day"></select>
+      </div>
+    </div>
+    <div class="field">
+      <label for="f-period">节次</label>
+      <div class="select-wrap">
+        <select id="f-period"></select>
+      </div>
+    </div>
+    <div class="field">
+      <label for="f-course">课程</label>
+      <div class="select-wrap">
+        <select id="f-course"></select>
+      </div>
+    </div>
+  </section>
+
+  <div class="result-bar">
+    <span>共 <span class="num" id="count">0</span> 条结果</span>
+    <button class="reset" id="reset" type="button">重置筛选</button>
+  </div>
+
+  <section class="list" id="list"></section>
+</main>
+
+<script>
+(function () {
+  /* ============ 课程数据 ============ */
+  const DATA = [
+    { name:'高等数学',          teacher:'孙梅',   room:'2-101',   period:'第一大节', day:'星期一', from:6,  to:19 },
+    { name:'英语',              teacher:'皮麒',   room:'2-604',   period:'第二大节', day:'星期一', from:6,  to:19 },
+    { name:'军事理论',          teacher:'蒋韧',   room:'1-103',   period:'第三大节', day:'星期一', from:8,  to:19 },
+    { name:'党史',              teacher:'赵苓妃', room:'1-104',   period:'第四大节', day:'星期一', from:7,  to:11 },
+    { name:'形势与政策',        teacher:'刘大芳', room:'1-108',   period:'第四大节', day:'星期一', from:14, to:17 },
+
+    { name:'就业指导',          teacher:'张畅',   room:'1-208',   period:'第一大节', day:'星期二', from:16, to:19 },
+    { name:'体育',              teacher:'周源灏', room:'体育场地', period:'第二大节', day:'星期二', from:6,  to:19 },
+
+    { name:'高等数学',          teacher:'孙梅',   room:'2-109',   period:'第一大节', day:'星期三', from:18, to:19 },
+    { name:'C语言程序设计',     teacher:'曾慧敏', room:'2-608',   period:'第二大节', day:'星期三', from:6,  to:19 },
+    { name:'TypeScript 应用开发', teacher:'左荣欣', room:'2-601', period:'第三大节', day:'星期三', from:6,  to:19 },
+    { name:'TypeScript 应用开发', teacher:'左荣欣', room:'1-401', period:'第四大节', day:'星期三', from:6,  to:19 },
+
+    { name:'思想道德与法治',    teacher:'汤成林', room:'3-201',   period:'第一大节', day:'星期四', from:7,  to:18 },
+    { name:'C语言程序设计',     teacher:'曾慧敏', room:'1-402',   period:'第二大节', day:'星期四', from:6,  to:19 },
+    { name:'信息技术与素养',    teacher:'邓湘江', room:'2-107',   period:'第三大节', day:'星期四', from:8,  to:19 },
+    { name:'信息技术与素养',    teacher:'邓湘江', room:'1-607-1', period:'第四大节', day:'星期四', from:8,  to:19 },
+
+    { name:'思想道德与法治',    teacher:'汤成林', room:'1-102',   period:'第一大节', day:'星期五', from:7,  to:18 },
+    { name:'英语',              teacher:'皮麒',   room:'1-103',   period:'第二大节', day:'星期五', from:6,  to:19 },
+    { name:'物联网导论',        teacher:'邹露',   room:'1-401',   period:'第三大节', day:'星期五', from:6,  to:19 },
+    { name:'心理健康教育',      teacher:'李洪',   room:'2-106',   period:'第四大节', day:'星期五', from:12, to:19 },
+
+    { name:'高速铁路概论',      teacher:'李兵',   room:'1-107',   period:'第二大节', day:'星期六', from:6,  to:19 },
+    { name:'高速铁路概论',      teacher:'李兵',   room:'1-106',   period:'第四大节', day:'星期六', from:19, to:19 }
+  ];
+
+  const DAY_ORDER    = ['星期一','星期二','星期三','星期四','星期五','星期六','星期日'];
+  const PERIOD_ORDER = ['第一大节','第二大节','第三大节','第四大节'];
+
+  /* ============ DOM ============ */
+  const daySel    = document.getElementById('f-day');
+  const periodSel = document.getElementById('f-period');
+  const courseSel = document.getElementById('f-course');
+  const listEl    = document.getElementById('list');
+  const countEl   = document.getElementById('count');
+  const resetBtn  = document.getElementById('reset');
+
+  /* ============ 工具函数 ============ */
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+
+  function fillSelect(sel, values, placeholder) {
+    sel.innerHTML = '<option value="">' + placeholder + '</option>' +
+      values.map(v => '<option value="' + esc(v) + '">' + esc(v) + '</option>').join('');
+  }
+
+  function weekText(from, to) {
+    return from === to ? from + ' 周' : from + ' ~ ' + to + ' 周';
+  }
+
+  /* ============ 初始化下拉菜单（无“全部”选项） ============ */
+  const days    = DAY_ORDER.filter(d => DATA.some(x => x.day === d));
+  const periods = PERIOD_ORDER.filter(p => DATA.some(x => x.period === p));
+  const courses = [...new Set(DATA.map(x => x.name))].sort((a, b) => a.localeCompare(b, 'zh'));
+
+  fillSelect(daySel,    days,    '请选择星期');
+  fillSelect(periodSel, periods, '请选择节次');
+  fillSelect(courseSel, courses, '请选择课程');
+
+  /* ============ 渲染 ============ */
+  function render() {
+    const d = daySel.value;
+    const p = periodSel.value;
+    const c = courseSel.value;
+
+    /* 必须三项全部选上，否则不展示任何课程 */
+    if (!d || !p || !c) {
+      countEl.textContent = '0';
+      listEl.innerHTML =
+        '<div class="empty"><div class="line"></div>请选择星期、节次和课程</div>';
+      return;
+    }
+
+    const result = DATA.filter(x =>
+      x.day === d && x.period === p && x.name === c
+    ).sort((a, b) =>
+      DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day) ||
+      PERIOD_ORDER.indexOf(a.period) - PERIOD_ORDER.indexOf(b.period) ||
+      a.name.localeCompare(b.name, 'zh')
+    );
+
+    countEl.textContent = result.length;
+
+    if (!result.length) {
+      listEl.innerHTML =
+        '<div class="empty"><div class="line"></div>没有符合条件的课程</div>';
+      return;
+    }
+
+    listEl.innerHTML = result.map(item => `
+      <article class="card">
+        <div class="card-top">
+          <span class="name">${esc(item.name)}</span>
+          <span class="period">${esc(item.period)}</span>
+        </div>
+        <div class="row"><span class="k">教师</span><span class="v">${esc(item.teacher)}</span></div>
+        <div class="row"><span class="k">教室</span><span class="v">${esc(item.room)}</span></div>
+        <div class="row"><span class="k">星期</span><span class="v">${esc(item.day)}</span></div>
+        <div class="row"><span class="k">周次</span><span class="v">${esc(weekText(item.from, item.to))}</span></div>
+      </article>
+    `).join('');
+  }
+
+  /* ============ 事件绑定 ============ */
+  [daySel, periodSel, courseSel].forEach(sel =>
+    sel.addEventListener('change', render)
+  );
+
+  resetBtn.addEventListener('click', () => {
+    daySel.value = '';
+    periodSel.value = '';
+    courseSel.value = '';
+    render();
+  });
+
+  /* 初次渲染：显示提示 */
+  render();
+})();
+</script>
+</body>
+</html>
