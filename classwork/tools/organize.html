@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>名单核对 · NAME CHECKER</title>
+<style>
+  :root{
+    --ink:#000;
+    --paper:#fff;
+    --gray:#8a8a8a;
+    --soft:#f7f7f7;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{max-width:1180px;margin:0 auto;padding:28px 20px 64px;}
+
+  /* ---------- 顶部 ---------- */
+  .head{
+    display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
+    border-bottom:2px solid var(--ink);padding-bottom:14px;margin-bottom:22px;
+  }
+  .head h1{margin:0;font-size:21px;font-weight:700;letter-spacing:4px;}
+  .head .en{
+    font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:11px;letter-spacing:3px;color:var(--gray);
+    padding-bottom:3px;
+  }
+
+  /* ---------- 布局 ---------- */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:stretch;}
+  @media (max-width:860px){
+    .grid{grid-template-columns:1fr;}
+  }
+
+  .panel{
+    border:1px solid var(--ink);
+    padding:16px;
+    display:flex;flex-direction:column;gap:12px;
+    background:var(--paper);
+  }
+  .panel-head{
+    display:flex;align-items:center;gap:10px;
+    border-bottom:1px solid var(--ink);padding-bottom:8px;
+  }
+  .panel-head .idx{
+    font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:11px;line-height:1;border:1px solid var(--ink);
+    padding:3px 5px;
+  }
+  .panel-head h2{margin:0;font-size:14px;font-weight:600;letter-spacing:3px;}
+  .panel-head .hint{
+    margin-left:auto;font-size:11px;color:var(--gray);letter-spacing:1px;
+    font-family:ui-monospace,Menlo,Consolas,monospace;
+  }
+
+  /* ---------- 控件 ---------- */
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+
+  button{
+    font-family:inherit;font-size:13px;letter-spacing:2px;
+    padding:9px 16px;border:1px solid var(--ink);background:var(--paper);color:var(--ink);
+    cursor:pointer;transition:background .15s ease,color .15s ease;
+  }
+  button:hover{background:var(--ink);color:var(--paper);}
+  button.solid{background:var(--ink);color:var(--paper);}
+  button.solid:hover{background:var(--paper);color:var(--ink);}
+  button:active{transform:translateY(1px);}
+
+  select{
+    font-family:inherit;font-size:13px;letter-spacing:1px;
+    padding:9px 32px 9px 10px;border:1px solid var(--ink);background-color:var(--paper);
+    color:var(--ink);cursor:pointer;appearance:none;-webkit-appearance:none;
+    background-image:
+      linear-gradient(45deg, transparent 50%, #000 50%),
+      linear-gradient(135deg, #000 50%, transparent 50%);
+    background-position: calc(100% - 17px) 50%, calc(100% - 12px) 50%;
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+    outline:none;
+  }
+  select:focus{box-shadow:inset 0 0 0 1px var(--ink);}
+
+  textarea{
+    width:100%;
+    min-height:300px;
+    flex:1;
+    resize:vertical;
+    border:1px solid var(--ink);
+    padding:12px;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"PingFang SC","Microsoft YaHei",monospace;
+    font-size:14px;
+    line-height:1.9;
+    outline:none;
+  }
+  textarea:focus{box-shadow:inset 0 0 0 1px var(--ink);}
+  textarea::placeholder{color:#bdbdbd;}
+
+  .meta{
+    display:flex;justify-content:space-between;align-items:center;
+    font-size:11px;color:var(--gray);letter-spacing:1px;
+    font-family:ui-monospace,Menlo,Consolas,monospace;
+  }
+
+  /* ---------- 结果 ---------- */
+  .result{display:flex;flex-direction:column;gap:14px;}
+  .result:empty{display:none;}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--ink);}
+  .stat{padding:10px 6px;text-align:center;border-right:1px solid var(--ink);}
+  .stat:last-child{border-right:none;}
+  .stat .num{
+    display:block;font-size:22px;font-weight:700;line-height:1.2;
+    font-family:ui-monospace,Menlo,Consolas,monospace;
+  }
+  .stat .label{display:block;font-size:11px;color:#666;letter-spacing:1px;margin-top:2px;}
+  @media (max-width:520px){
+    .stats{grid-template-columns:repeat(2,1fr);}
+    .stat:nth-child(2){border-right:none;}
+    .stat:nth-child(1),.stat:nth-child(2){border-bottom:1px solid var(--ink);}
+  }
+
+  .block{border-top:1px solid var(--ink);padding-top:10px;}
+  .block:first-child{border-top:none;padding-top:0;}
+  .block-head{
+    display:flex;justify-content:space-between;align-items:center;
+    font-size:12px;letter-spacing:2px;margin-bottom:8px;
+  }
+  .block-head .count{
+    font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:11px;border:1px solid var(--ink);padding:1px 6px;letter-spacing:0;
+  }
+
+  .tags{display:flex;flex-wrap:wrap;gap:6px;}
+  .tag{
+    font-size:13px;line-height:1.6;padding:3px 9px;border:1px solid var(--ink);
+    display:inline-flex;align-items:center;gap:5px;
+  }
+  .tag em{
+    font-style:normal;font-size:11px;color:#777;
+    font-family:ui-monospace,Menlo,Consolas,monospace;
+  }
+  .tag.miss{border-style:dashed;background:var(--soft);}
+
+  .notice{
+    border:1px dashed var(--ink);padding:12px;text-align:center;
+    font-size:13px;letter-spacing:1px;color:#444;background:var(--soft);
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="head">
+    <h1>名单核对</h1>
+    <span class="en">NAME · CHECKER</span>
+  </div>
+
+  <div class="grid">
+
+    <!-- ============ 左：名单 ============ -->
+    <section class="panel">
+      <div class="panel-head">
+        <span class="idx">01</span>
+        <h2>名单</h2>
+        <span class="hint">每行一个姓名</span>
+      </div>
+
+      <div class="toolbar">
+        <select id="presetSelect">
+          <option value="">— 选择预选名单 —</option>
+        </select>
+        <button id="clearList">清空名单</button>
+      </div>
+
+      <textarea id="nameList" placeholder="在此输入姓名，每行一个&#10;例如：&#10;张三&#10;李四"></textarea>
+
+      <div class="meta">
+        <span id="listCount">0 人</span>
+        <span>LIST</span>
+      </div>
+    </section>
+
+    <!-- ============ 右：文本 ============ -->
+    <section class="panel">
+      <div class="panel-head">
+        <span class="idx">02</span>
+        <h2>比对文本</h2>
+        <span class="hint">粘贴任意内容</span>
+      </div>
+
+      <textarea id="textInput" placeholder="在此粘贴任意文本内容，例如聊天记录、报名表、签到表……&#10;&#10;点击下方「开始比对」按钮进行核对"></textarea>
+
+      <div class="toolbar">
+        <button class="solid" id="runBtn">开始比对</button>
+        <button id="clearText">清空文本</button>
+      </div>
+
+      <div class="result" id="result"></div>
+    </section>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------- 预选名单 ---------- */
+  const PRESETS = {
+    '物联网2603': `曹海洋
+曾星宇
+陈惠芸
+程铠煦
+戴训武
+邓品雪
+郭盈盈
+韩瑾
+郝奕博
+洪鑫
+黄沛谕
+蒋凌杰
+赖宇翔
+雷心怡
+李程羽
+李思源
+李星尘
+廖新哲
+刘鑫
+刘怡馨
+刘源铭
+刘梓娇
+罗政涛
+聂于钧
+欧阳雨嫣
+彭虎
+全驿名
+孙蒙
+唐冰晗
+唐伟明
+陶思勇
+万梁贝
+汪嘉伟
+王瑾
+王凯文
+王诗慧
+吴峰
+吴颖
+伍献永
+肖兴平
+谢延锋
+熊祉皓
+徐筠茹
+杨华川
+易宇峰
+张诗若
+周隽文
+邹芷涵
+左宸宇`
+  };
+
+  /* ---------- DOM ---------- */
+  const listEl      = document.getElementById('nameList');
+  const textEl      = document.getElementById('textInput');
+  const presetEl    = document.getElementById('presetSelect');
+  const resultEl    = document.getElementById('result');
+  const listCountEl = document.getElementById('listCount');
+
+  /* ---------- 初始化下拉框 ---------- */
+  Object.keys(PRESETS).forEach(function (key) {
+    const opt = document.createElement('option');
+    opt.value = key;
+    opt.textContent = key;
+    presetEl.appendChild(opt);
+  });
+
+  /* ---------- 工具函数 ---------- */
+  function parseNames(str) {
+    return str
+      .split(/[\n\r,，、;；\t]+/)
+      .map(function (s) { return s.trim(); })
+      .filter(function (s) { return s.length > 0; });
+  }
+
+  function countOccurrences(text, name) {
+    if (!name) return 0;
+    let count = 0, idx = 0;
+    while ((idx = text.indexOf(name, idx)) !== -1) {
+      count++;
+      idx += name.length;
+    }
+    return count;
+  }
+
+  function esc(s) {
+    return s.replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function updateListCount() {
+    const n = parseNames(listEl.value).length;
+    listCountEl.textContent = n ? n + ' 人' : '0 人';
+  }
+
+  /* ---------- 比对 ---------- */
+  function compare() {
+    const raw  = parseNames(listEl.value);
+    const text = textEl.value;
+
+    if (raw.length === 0) {
+      resultEl.innerHTML = '<div class="notice">请先在左侧输入名单，或选择一个预选名单</div>';
+      return;
+    }
+    if (text.trim().length === 0) {
+      resultEl.innerHTML = '<div class="notice">请先在右侧粘贴要核对的文本内容</div>';
+      return;
+    }
+
+    /* 去重（保留顺序） */
+    const seen = new Set(), uniq = [], dup = [];
+    raw.forEach(function (n) {
+      if (seen.has(n)) dup.push(n);
+      else { seen.add(n); uniq.push(n); }
+    });
+
+    const found = [], missing = [];
+    let totalOcc = 0;
+
+    uniq.forEach(function (name) {
+      const c = countOccurrences(text, name);
+      if (c > 0) {
+        found.push({ name: name, count: c });
+        totalOcc += c;
+      } else {
+        missing.push(name);
+      }
+    });
+
+    /* ----- 渲染 ----- */
+    function stat(num, label) {
+      return '<div class="stat"><span class="num">' + num +
+             '</span><span class="label">' + label + '</span></div>';
+    }
+
+    let html = '<div class="stats">' +
+      stat(uniq.length, '名单人数') +
+      stat(found.length, '已找到') +
+      stat(missing.length, '未找到') +
+      stat(totalOcc, '出现总次数') +
+      '</div>';
+
+    /* 缺失名单 */
+    html += '<div class="block">' +
+      '<div class="block-head"><span>缺失名单</span><span class="count">' + missing.length + '</span></div>';
+    if (missing.length) {
+      html += '<div class="tags">' + missing.map(function (n) {
+        return '<span class="tag miss">' + esc(n) + '</span>';
+      }).join('') + '</div>';
+    } else {
+      html += '<div class="notice">全员到齐 ✓</div>';
+    }
+    html += '</div>';
+
+    /* 已找到 */
+    if (found.length) {
+      html += '<div class="block">' +
+        '<div class="block-head"><span>已找到</span><span class="count">' + found.length + '</span></div>' +
+        '<div class="tags">' + found.map(function (f) {
+          return '<span class="tag">' + esc(f.name) +
+                 (f.count > 1 ? '<em>×' + f.count + '</em>' : '') + '</span>';
+        }).join('') + '</div></div>';
+    }
+
+    /* 名单内重复 */
+    if (dup.length) {
+      html += '<div class="block">' +
+        '<div class="block-head"><span>名单内重复</span><span class="count">' + dup.length + '</span></div>' +
+        '<div class="tags">' + dup.map(function (n) {
+          return '<span class="tag">' + esc(n) + '</span>';
+        }).join('') + '</div></div>';
+    }
+
+    resultEl.innerHTML = html;
+  }
+
+  /* ---------- 事件绑定 ---------- */
+  presetEl.addEventListener('change', function () {
+    const key = presetEl.value;
+    if (key && PRESETS[key]) {
+      listEl.value = PRESETS[key];
+      updateListCount();
+      resultEl.innerHTML = '';
+    }
+  });
+
+  document.getElementById('clearList').addEventListener('click', function () {
+    listEl.value = '';
+    presetEl.value = '';
+    updateListCount();
+    resultEl.innerHTML = '';
+    listEl.focus();
+  });
+
+  document.getElementById('clearText').addEventListener('click', function () {
+    textEl.value = '';
+    resultEl.innerHTML = '';
+    textEl.focus();
+  });
+
+  document.getElementById('runBtn').addEventListener('click', compare);
+
+  listEl.addEventListener('input', updateListCount);
+
+  /* Ctrl / Cmd + Enter 快捷比对 */
+  document.addEventListener('keydown', function (e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      compare();
+    }
+  });
+
+  /* 初始 */
+  updateListCount();
+})();
+</script>
+</body>
+</html>
