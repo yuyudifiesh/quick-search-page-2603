@@ -55,6 +55,11 @@
     margin-bottom: 28px;
     border-bottom: 1px solid #111;
   }
+  .head-left {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
   h1 {
     margin: 0;
     font-size: 18px;
@@ -62,6 +67,18 @@
     letter-spacing: .3em;
     text-indent: .3em;
   }
+  /* 标题右侧的文本按钮 */
+  .tool-link {
+    font-size: 12px;
+    letter-spacing: .08em;
+    color: #999;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color .18s ease;
+  }
+  .tool-link:hover { color: #111; }
+  .tool-link:focus-visible { outline: 2px solid #111; outline-offset: 2px; }
+
   .head-right {
     display: flex;
     align-items: baseline;
@@ -164,7 +181,12 @@
 
 <div class="wrap">
   <div class="head">
-    <h1>名单</h1>
+    <div class="head-left">
+      <h1>名单</h1>
+      <a class="tool-link"
+         href="organize.html"
+         rel="noopener">核对工具</a>
+    </div>
     <div class="head-right">
       <span class="count">已清 <b id="done">0</b> / <span id="total">0</span></span>
     </div>
