@@ -81,8 +81,8 @@
 
   .head-right {
     display: flex;
-    align-items: baseline;
-    gap: 18px;
+    align-items: center;
+    gap: 12px;
     font-size: 12px;
     letter-spacing: .08em;
     color: #999;
@@ -90,14 +90,68 @@
   .count { color: #111; font-variant-numeric: tabular-nums; }
   .count b { font-weight: 600; font-size: 14px; }
 
-  /* ---------- 网格 ---------- */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    border: 1px solid #111;
+    background: #fff;
+    color: #111;
+    padding: 8px 32px 8px 10px;
+    font-size: 12px;
+    letter-spacing: .08em;
+    min-width: 200px;
+    max-width: 100%;
+    background-image:
+      linear-gradient(45deg, transparent 50%, #000 50%),
+      linear-gradient(135deg, #000 50%, transparent 50%);
+    background-position: calc(100% - 14px) calc(50% - 2px), calc(100% - 9px) calc(50% - 2px);
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+  }
+
+  button {
+    appearance: none;
+    border: 1px solid #111;
+    background: #fff;
+    color: #111;
+    font-size: 12px;
+    letter-spacing: .08em;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color .18s ease, color .18s ease;
+  }
+  button:hover { background: #111; color: #fff; }
+  button:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+  }
+
+  .status {
+    min-height: 18px;
+    margin-bottom: 12px;
+    font-size: 11px;
+    letter-spacing: .08em;
+    color: #666;
+  }
+  .status.err {
+    color: #c00;
+  }
+
   .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
     gap: 12px;
   }
 
-  /* ---------- 卡片 ---------- */
   .card {
     position: relative;
     display: flex;
@@ -116,7 +170,6 @@
   .card:active { transform: translateY(1px); }
   .card:focus-visible { outline: 2px solid #111; outline-offset: 2px; }
 
-  /* 复选框 */
   .box {
     position: absolute;
     left: 12px;
@@ -141,7 +194,6 @@
     transition: transform .18s ease;
   }
 
-  /* 姓名 */
   .name {
     position: relative;
     font-size: 15px;
@@ -161,7 +213,6 @@
     transition: width .22s ease;
   }
 
-  /* ---------- 已清除状态 ---------- */
   .card.done { background: #fafafa; border-color: #c9c9c9; }
   .card.done .box { background: #111; border-color: #111; }
   .card.done .box::after { transform: rotate(45deg) scale(1); }
@@ -189,72 +240,289 @@
     </div>
     <div class="head-right">
       <span class="count">已清 <b id="done">0</b> / <span id="total">0</span></span>
+      <div class="toolbar">
+        <select id="presetSelect" disabled>
+          <option value="">正在获取名单列表</option>
+        </select>
+        <button id="reloadPresets" type="button">刷新</button>
+      </div>
     </div>
   </div>
 
+  <div class="status" id="presetStatus"></div>
   <div class="grid" id="grid"></div>
 
   <p class="foot">刷新以重置选择</p>
 </div>
 
 <script>
-  const names = [
-    "曹海洋","曾星宇","陈惠芸","程铠煦","戴训武","邓品雪","郭盈盈","韩瑾",
-    "郝奕博","洪鑫","黄沛谕","蒋凌杰","赖宇翔","雷心怡","李程羽","李思源",
-    "李星尘","廖新哲","刘鑫","刘怡馨","刘源铭","刘梓娇","罗政涛","聂于钧",
-    "欧阳雨嫣","彭虎","全驿名","孙蒙","唐冰晗","唐伟明","陶思勇","万梁贝",
-    "汪嘉伟","王瑾","王凯文","王诗慧","吴峰","吴颖","伍献永","肖兴平",
-    "谢延锋","熊祉皓","徐筠茹","杨华川","易宇峰","张诗若","周隽文","邹芷涵",
-    "左宸宇"
-  ];
+  const PRESET_DIR = './datas/namelist/';
+  const INDEX_FILE = 'index.json';
+  const FETCH_TIMEOUT = 8000;
 
-  const grid     = document.getElementById("grid");
-  const doneEl   = document.getElementById("done");
-  const totalEl  = document.getElementById("total");
+  const grid = document.getElementById('grid');
+  const doneEl = document.getElementById('done');
+  const totalEl = document.getElementById('total');
+  const presetEl = document.getElementById('presetSelect');
+  const statusEl = document.getElementById('presetStatus');
+  const reloadBtn = document.getElementById('reloadPresets');
 
   let doneCount = 0;
+  let activeNames = [];
+  let presets = {};
 
-  names.forEach(name => {
-    const card = document.createElement("div");
-    card.className = "card";
-    card.setAttribute("role", "checkbox");
-    card.setAttribute("aria-checked", "false");
-    card.setAttribute("tabindex", "0");
-
-    const box = document.createElement("span");
-    box.className = "box";
-    box.setAttribute("aria-hidden", "true");
-
-    const label = document.createElement("span");
-    label.className = "name";
-    label.textContent = name;
-
-    card.append(box, label);
-
-    card.addEventListener("click", () => toggle(card));
-    card.addEventListener("keydown", e => {
-      if (e.key === " " || e.key === "Enter") {
-        e.preventDefault();
-        toggle(card);
-      }
-    });
-
-    grid.appendChild(card);
-  });
-
-  function toggle(card) {
-    const isDone = card.classList.toggle("done");
-    card.setAttribute("aria-checked", String(isDone));
-    doneCount += isDone ? 1 : -1;
-    doneEl.textContent = doneCount;
+  function fetchWithTimeout(url, options, ms) {
+    const controller = new AbortController();
+    const timer = setTimeout(function () { controller.abort(); }, ms || FETCH_TIMEOUT);
+    return fetch(url, Object.assign({ cache: 'no-store' }, options || {}, {
+      signal: controller.signal
+    })).finally(function () { clearTimeout(timer); });
   }
 
-  totalEl.textContent = names.length;
+  async function fetchJson(url) {
+    const res = await fetchWithTimeout(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return res.json();
+  }
 
-  /* 阻止拖拽选中与右键菜单复制（增强不可选中） */
-  document.addEventListener("dragstart", e => e.preventDefault());
-  document.addEventListener("copy", e => e.preventDefault());
-  document.addEventListener("cut", e => e.preventDefault());
+  async function discoverFiles() {
+    try {
+      const idx = await fetchJson(PRESET_DIR + INDEX_FILE);
+      let files = [];
+      if (Array.isArray(idx)) files = idx;
+      else if (idx && Array.isArray(idx.files)) files = idx.files;
+      else if (idx && Array.isArray(idx.list)) files = idx.list;
+      files = files
+        .filter(function (f) { return typeof f === 'string' && f.trim(); })
+        .map(function (f) { return f.trim(); });
+      if (files.length) return files;
+    } catch (e) {}
+
+    try {
+      const res = await fetchWithTimeout(PRESET_DIR);
+      if (res.ok) {
+        const html = await res.text();
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const found = [];
+        doc.querySelectorAll('a[href]').forEach(function (a) {
+          const href = (a.getAttribute('href') || '').split('?')[0].split('#')[0];
+          if (!/\.json$/i.test(href)) return;
+          const name = decodeURIComponent(href.substring(href.lastIndexOf('/') + 1));
+          if (name && name.toLowerCase() !== INDEX_FILE.toLowerCase()) found.push(name);
+        });
+        const unique = Array.from(new Set(found));
+        if (unique.length) return unique;
+      }
+    } catch (e) {}
+
+    throw new Error('NO_FILES');
+  }
+
+  function normalizePreset(data, filename) {
+    const baseName = filename.replace(/\.json$/i, '');
+    const out = [];
+
+    function push(id, name, names) {
+      if (!Array.isArray(names)) return;
+      const cleaned = names
+        .map(function (n) { return String(n == null ? '' : n).trim(); })
+        .filter(function (n) { return n.length > 0; });
+      if (!cleaned.length) return;
+      out.push({
+        id: String(id || baseName).trim() || baseName,
+        name: String(name || id || baseName).trim() || baseName,
+        names: cleaned
+      });
+    }
+
+    function fromItem(item, fallbackId, fallbackName) {
+      if (!item) return;
+      if (typeof item === 'string') { push(fallbackId, fallbackName, [item]); return; }
+      const id = item.id || item.key || fallbackId;
+      const name = item.name || item.title || item.id || fallbackName;
+      let names = item.names || item.list || item.members || item.students;
+      if (!Array.isArray(names)) names = [];
+      push(id, name, names);
+    }
+
+    if (Array.isArray(data)) {
+      if (data.every(function (x) { return typeof x === 'string'; })) {
+        push(baseName, baseName, data);
+        return out;
+      }
+      data.forEach(function (item, i) {
+        fromItem(item, baseName + '-' + (i + 1), baseName + ' ' + (i + 1));
+      });
+      return out;
+    }
+
+    if (data && typeof data === 'object') {
+      if (Array.isArray(data.presets)) {
+        data.presets.forEach(function (item, i) {
+          fromItem(item, baseName + '-' + (i + 1), baseName + ' ' + (i + 1));
+        });
+        return out;
+      }
+      if (Array.isArray(data.names || data.list || data.members || data.students)) {
+        fromItem(data, baseName, baseName);
+        return out;
+      }
+      const keys = Object.keys(data);
+      if (keys.length && keys.every(function (k) { return Array.isArray(data[k]); })) {
+        keys.forEach(function (k) { push(k, k, data[k]); });
+        return out;
+      }
+      if (keys.length && keys.every(function (k) {
+        return data[k] && typeof data[k] === 'object' && !Array.isArray(data[k]);
+      })) {
+        keys.forEach(function (k) {
+          const v = data[k];
+          const names = v.names || v.list || v.members || v.students || [];
+          push(v.id || k, v.name || k, names);
+        });
+      }
+    }
+
+    return out;
+  }
+
+  async function loadPresets() {
+    presetEl.disabled = true;
+    presetEl.innerHTML = '<option value="">— 加载中… —</option>';
+    statusEl.className = 'status';
+    statusEl.textContent = '正在读取 ' + PRESET_DIR + ' …';
+    presets = {};
+
+    let files = [];
+    try {
+      files = await discoverFiles();
+    } catch (err) {
+      presetEl.innerHTML = '<option value="">NaN</option>';
+      statusEl.className = 'status err';
+      statusEl.textContent = location.protocol === 'file:' ? '加载失败：请先启动本地服务器。' : '加载失败：无法获取名单文件列表。';
+      return;
+    }
+
+    const results = await Promise.allSettled(
+      files.map(function (file) {
+        return fetchJson(PRESET_DIR + file).then(function (data) {
+          return { file: file, data: data };
+        });
+      })
+    );
+
+    const failed = [];
+    let loadedCount = 0;
+
+    results.forEach(function (r, i) {
+      const file = files[i];
+      if (r.status === 'rejected') {
+        failed.push(file + '（读取失败）');
+        return;
+      }
+      const list = normalizePreset(r.value.data, file);
+      if (!list.length) {
+        failed.push(file + '（未解析出有效名单）');
+        return;
+      }
+      list.forEach(function (item) {
+        let id = item.id, base = id, n = 1;
+        while (presets[id]) { id = base + '-' + (++n); }
+        presets[id] = { name: item.name, names: item.names };
+        loadedCount++;
+      });
+    });
+
+    const keys = Object.keys(presets);
+    if (!keys.length) {
+      presetEl.innerHTML = '<option value="">— 暂无可用名单 —</option>';
+      statusEl.className = 'status err';
+      statusEl.textContent = '未加载到任何有效名单。';
+      return;
+    }
+
+    presetEl.innerHTML = '<option value="">— 选择预选名单 —</option>';
+    keys.forEach(function (id) {
+      const opt = document.createElement('option');
+      opt.value = id;
+      opt.textContent = presets[id].name + '（' + presets[id].names.length + ' 人）';
+      presetEl.appendChild(opt);
+    });
+    presetEl.disabled = false;
+
+    statusEl.className = 'status';
+    statusEl.textContent = '已加载 ' + loadedCount + ' 份名单' +
+      (failed.length ? '；失败 ' + failed.length + ' 个：' + failed.join('；') : '');
+
+    if (!presetEl.value) {
+      applyNames([]);
+    }
+  }
+
+  function renderNames(names) {
+    grid.innerHTML = '';
+    doneCount = 0;
+    doneEl.textContent = '0';
+    totalEl.textContent = String(names.length);
+
+    names.forEach(function (name) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.setAttribute('role', 'checkbox');
+      card.setAttribute('aria-checked', 'false');
+      card.setAttribute('tabindex', '0');
+
+      const box = document.createElement('span');
+      box.className = 'box';
+      box.setAttribute('aria-hidden', 'true');
+
+      const label = document.createElement('span');
+      label.className = 'name';
+      label.textContent = name;
+
+      card.append(box, label);
+      card.addEventListener('click', function () { toggle(card); });
+      card.addEventListener('keydown', function (e) {
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          toggle(card);
+        }
+      });
+
+      grid.appendChild(card);
+    });
+  }
+
+  function applyNames(names) {
+    activeNames = Array.isArray(names) ? names : [];
+    renderNames(activeNames);
+  }
+
+  function toggle(card) {
+    const isDone = card.classList.toggle('done');
+    card.setAttribute('aria-checked', String(isDone));
+    doneCount += isDone ? 1 : -1;
+    doneEl.textContent = String(doneCount);
+  }
+
+  presetEl.addEventListener('change', function () {
+    const key = presetEl.value;
+    if (!key || !presets[key]) {
+      applyNames([]);
+      return;
+    }
+    applyNames(presets[key].names.slice());
+  });
+
+  reloadBtn.addEventListener('click', function () {
+    loadPresets();
+  });
+
+  document.addEventListener('dragstart', function (e) { e.preventDefault(); });
+  document.addEventListener('copy', function (e) { e.preventDefault(); });
+  document.addEventListener('cut', function (e) { e.preventDefault(); });
+
+  loadPresets();
 </script>
 
 </body>
