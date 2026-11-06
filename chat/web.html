@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>微信对话</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    #wx-chat-container {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div id="wx-chat-container"></div>
+
+  <script src="https://chatbot.weixin.qq.com/mmspraiweb_node/dist/static/script/H5_SDK_ACCESS.js"></script>
+  <script>
+    WxChat.init({
+      appId: "us9cQItJEv66uj44SW6gOIQHPsntUe",
+      openId: "o9U-85g9PFAOmtFi6I7WGDEGkZTE",
+      robotName: "QA2603",
+      mode: "fullscreen",
+    });
+  </script>
+</body>
+</html>
